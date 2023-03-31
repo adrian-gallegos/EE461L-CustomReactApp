@@ -1,175 +1,163 @@
-//import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-
+//import axios from 'axios'
 import React, {useState} from "react";
 import Button from '@mui/material/Button'; // import a component from Material UI
 
-/*function CustomComponent(props) {
-    return (
-        <div className="custom-component">
-            <h2>{props.title}</h2>
-            <p>{props.description}</p>
-        </div>
-    );
-}*/
+// Define some sample data for projects and hardware sets
+const projects = [
+  {
+    name: "Project 1",
+    hardwareSets: [
+      {
+        name: "Hardware Set 1",
+        checkedOut: 2,
+        total: 100,
+      },
+      {
+        name: "Hardware Set 2",
+        checkedOut: 3,
+        total: 100,
+      },
+    ],
+    joined: true,
+  },
+  {
+    name: "Project 2",
+    hardwareSets: [
+      {
+        name: "Hardware Set 3",
+        checkedOut: 1,
+        total: 100,
+      },
+      {
+        name: "Hardware Set 4",
+        checkedOut: 0,
+        total: 100,
+      },
+    ],
+    joined: false,
+  },
+];
 
-/*class Projects extends React.Component {
-    // const [count, setCount] = useState(0); // use a state hook to store a count
-    //
-    // const handleCountClick = () => {
-    //     setCount(count + 1);
-    // define a custom event handler to modify the state
-    constructor(props) {
-        super(props);
-        //init states
-    }
-    handleCountClick() {
-        return "balls";
-    }
-    render() {
-        return (
-            <div className="projects">
-                <h1>Projects</h1>
-                <Button variant="contained">
-                    Material UI Button
-                </Button>
-                <CustomComponent title="Component 1" description="Description 1"/>
-                <CustomComponent title="Component 2" description="Description 2"/>
-                <CustomComponent title="Component 3" description="Description 3"/>
-                <Button variant="contained">Click me to increment count</Button>
-            </div>
-        );
-    }
+function ProjectList() {
+  const [projectList, setProjectList] = useState(projects);
+  const [checkoutQty, setCheckoutQty] = useState(1);
+  const [checkinQty, setCheckinQty] = useState(1);
+  const [messages, setMessages] = useState([]);
+
+  function handleJoinClick(index) {
+  const newProjectList = [...projectList];
+  const projectId = index + 1;
+  const url = projectList[index].joined ? `http://localhost:5000/leave_project/${projectId}` : `http://localhost:5000/join_project/${projectId}`;
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      window.alert(data.message); // Display a pop-up message
+      setMessages(messages => [...messages, data.message]);
+    });
+
+  newProjectList[index].joined = !newProjectList[index].joined;
+  setProjectList(newProjectList);
 }
 
-function Root(props) {
-    return(
-        <div>
-            <Projects name="alksdjf;lkasdjfl;kasjdf"/>
-            <div>root</div>
-        </div>
-    );
-}*/
+function handleCheckout(index, hardwareIndex) {
+  const newProjectList = [...projectList];
+  const hardwareSet = newProjectList[index].hardwareSets[hardwareIndex];
+  const projectId = index + 1;
+  const hardwareSetId = hardwareIndex + 1;
+  const url = `http://localhost:5000/checkout_hardware/${projectId}/${checkoutQty}`;
 
-/*
-function App() {
-    return (
-        <div className="App">
-            <Projects />
-        </div>
-    );
-}*/
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      window.alert(data.message); // Display a pop-up message
+      setMessages(messages => [...messages, data.message]);
+    });
 
-function App() {
-    const [showProjects, setShowProjects] = useState(true);
-    const [projectList, setProjectList] = useState([
-        { name: "Project 1", description: "Description of project 1" },
-        { name: "Project 2", description: "Description of project 2" },
-        { name: "Project 3", description: "Description of project 3" },
-    ]);
-
-    const toggleProjects = () => {
-        setShowProjects(!showProjects);
-    };
-
-    const addProject = (project) => {
-        setProjectList([...projectList, project]);
-    };
-
-    return (
-        <div className="container">
-            <h1>My Projects</h1>
-            <button onClick={toggleProjects}>Toggle Projects</button>
-            {showProjects && (
-                <Projects
-                    projects={projectList}
-                    onAddProject={addProject}
-                />
-            )}
-        </div>
-    );
+  hardwareSet.checkedOut += checkoutQty;
+  setProjectList(newProjectList);
 }
 
-function Projects(props) {
-    const [showForm, setShowForm] = useState(false);
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
+function handleCheckin(index, hardwareIndex) {
+  const newProjectList = [...projectList];
+  const hardwareSet = newProjectList[index].hardwareSets[hardwareIndex];
+  const projectId = index + 1;
+  const hardwareSetId = hardwareIndex + 1;
+  const url = `http://localhost:5000/checkin_hardware/${projectId}/${checkinQty}`;
 
-    const toggleForm = () => {
-        setShowForm(!showForm);
-    };
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      window.alert(data.message); // Display a pop-up message
+      setMessages(messages => [...messages, data.message]);
+    });
 
-    const handleNameChange = (event) => {
-        setName(event.target.value);
-    };
-
-    const handleDescriptionChange = (event) => {
-        setDescription(event.target.value);
-    };
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        props.onAddProject({ name, description });
-        setName("");
-        setDescription("");
-        toggleForm();
-    };
-
-    return (
-        <div>
-            <h2>Project List</h2>
-            {props.projects.map((project, index) => (
-                <Project
-                    key={index}
-                    name={project.name}
-                    description={project.description}
-                />
-            ))}
-            <Button variant="contained" color="primary" onClick={toggleForm}>
-                Add Project
-            </Button>
-            {showForm && (
-                <form onSubmit={handleSubmit}>
-                    <label>
-                        Name:
-                        <input type="text" value={name} onChange={handleNameChange} />
-                    </label>
-                    <label>
-                        Description:
-                        <textarea value={description} onChange={handleDescriptionChange} />
-                    </label>
-                    <Button type="submit" variant="contained" color="primary">
-                        Add
-                    </Button>
-                </form>
-            )}
-        </div>
-    );
+  hardwareSet.checkedOut -= checkinQty;
+  setProjectList(newProjectList);
 }
 
-function Project(props) {
-    return (
-        <div className="project">
-            <h3>{props.name}</h3>
-            <p>{props.description}</p>
-        </div>
-    );
+  return (
+      <div>
+        <h1>User Projects</h1>
+        <ul>
+          {projectList.map((project, index) => (
+              <li key={index}>
+                <h2>{project.name}</h2>
+                <button onClick={() => handleJoinClick(index)}>
+                  {project.joined ? "Leave" : "Join"}
+                </button>
+                <ul>
+                  {project.hardwareSets.map((hardwareSet, hardwareIndex) => (
+                      <li key={hardwareIndex}>
+                        {hardwareSet.name}: {hardwareSet.checkedOut} of{" "}
+                        {hardwareSet.total} checked out
+                        <div>
+                          <input
+                              type="number"
+                              min="1"
+                              max={hardwareSet.total - hardwareSet.checkedOut}
+                              value={checkoutQty}
+                              onChange={(e) => setCheckoutQty(parseInt(e.target.value))}
+                          />
+                          <button
+                              onClick={() => handleCheckout(index, hardwareIndex)}
+                              disabled={
+                                  hardwareSet.checkedOut >= hardwareSet.total ||
+                                  checkoutQty <= 0
+                              }
+                          >
+                            Checkout
+                          </button>
+                        </div>
+                        <div>
+                          <input
+                              type="number"
+                              min="1"
+                              max={hardwareSet.checkedOut}
+                              value={checkinQty}
+                              onChange={(e) => setCheckinQty(parseInt(e.target.value))}
+                          />
+                          <button
+                              onClick={() => handleCheckin(index, hardwareIndex)}
+                              disabled={hardwareSet.checkedOut <= 0 || checkinQty <= 0}
+                          >
+                            Checkin
+                          </button>
+                        </div>
+                        {hardwareSet.message && <p>{hardwareSet.message}</p>}
+                      </li>
+                  ))}
+                </ul>
+              </li>
+          ))}
+        </ul>
+      </div>
+  );
 }
-
-
-
-/*ReactDOM.render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>,
-    document.getElementById('root')
-);*/
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-//reportWebVitals();
+root.render(<ProjectList />);
